@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        body, html {
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #e0f7fa;
+        }
+        .login-container {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: perspective(1000px) rotateY(0deg);
+            transition: transform 0.5s;
+            width: 400px;
+        }
+        .login-container:hover {
+            transform: perspective(1000px) rotateY(10deg);
+        }
+        .form-control {
+            margin-bottom: 15px;
+        }
+        h2 {
+            color: #00796b;
+        }
+        .btn-primary {
+            background-color: #00796b;
+            border-color: #00796b;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2 class="text-center">Login</h2>
+        <form method="POST">
+            <div class="form-group">
+                <input type="text" class="form-control" name="email" placeholder="Email" required>
+            </div>
+            <div class="form-group">
+                <input type="password" class="form-control" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Login</button>
+        </form>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</body>
+</html>
