@@ -1,7 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
-import requests
-
-
+from flask import Flask, render_template, request, redirect, url_for, flash 
+# import request
 app = Flask(__name__)
 app.secret_key = "secret"
 
@@ -35,9 +33,30 @@ def login():
     return render_template("login.html")
 
 
-# Route: Upload Dataset (Flask calls FastAPI)
-@app.route("/upload", methods=["POST"])
+@app.route("/upload", methods=["GET", "POST"])
 def upload_dataset():
+    if request.method == "POST":
+        if "file" not in request.files:
+            flash("No file part", "danger")
+            return redirect(request.url)
+
+        file = request.files["file"]
+        if file.filename == "":
+            flash("No selected file", "danger")
+            return redirect(request.url)
+
+        files = {"file": (file.filename, file.stream, file.content_type)}
+        response = requests.post(f"{FASTAPI_URL}/predict/", files=files)
+
+        if response.status_code == 200:
+            predictions = response.json()
+            return render_template("result.html", predictions=predictions)
+        else:
+            flash("Error in prediction", "danger")
+            return redirect(url_for("dashboard"))
+    
+    # Render the upload form for GET requests
+    return render_template("upload.html")
     if "file" not in request.files:
         flash("No file part", "danger")
         return redirect(request.url)
