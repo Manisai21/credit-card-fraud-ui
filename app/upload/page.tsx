@@ -4,73 +4,11 @@ import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/button";
 
-// "use client";
-// import { File, UploadCloud } from "lucide-react";
-// import { useState } from "react";
-// import { useDropzone } from "react-dropzone";
-// import { Button } from "@/components/ui/button";
-
-// export default function UploadPage() {
-//   const [files, setFiles] = useState<File[]>([]);
-
-//   const onDrop = (acceptedFiles: File[]) => {
-//     setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
-//   };
-
-//   const { getRootProps, getInputProps } = useDropzone({ onDrop });
-
-//   const handleGoogleDriveUpload = () => {
-//     // Google Drive upload logic
-//   };
-
-//   const handleDropboxUpload = () => {
-//     // Dropbox upload logic
-//   };
-
-//   return (
-//     <div className="flex flex-col items-center p-6 space-y-6">
-//       <h1 className="text-2xl font-semibold">Upload Your Files</h1>
-
-//       {/* Drag and Drop Area */}
-//       <div
-//         {...getRootProps()}
-//         className="w-full max-w-lg p-10 border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-blue-500"
-//       >
-//         <input {...getInputProps()} />
-//         <UploadCloud className="w-12 h-12 text-gray-500" />
-//         <p className="mt-2 text-gray-600">Drag & Drop files here</p>
-//       </div>
-
-//       {/* Buttons for Google Drive & Dropbox */}
-//       <div className="flex space-x-4">
-//         <Button onClick={handleGoogleDriveUpload} className="bg-blue-600 hover:bg-blue-700">
-//           Upload from Google Drive
-//         </Button>
-//         <Button onClick={handleDropboxUpload} className="bg-blue-400 hover:bg-blue-500">
-//           Upload from Dropbox
-//         </Button>
-//       </div>
-
-//       {/* Uploaded Files List */}
-//       <div className="w-full max-w-lg mt-4">
-//         <h2 className="text-lg font-semibold">Uploaded Files:</h2>
-//         <ul className="mt-2 space-y-2">
-//           {files.map((file, index) => (
-//             <li key={index} className="flex items-center space-x-2 p-2 border rounded-md">
-//               <File className="w-5 h-5 text-gray-500" />
-//               <span>{file.name}</span>
-//             </li>
-//           ))}
-//         </ul>
-//       </div>
-//     </div>
-//   );
-// }
-
-
 export default function UploadPage() {
   const [files, setFiles] = useState<File[]>([]);
-  const [predictions, setPredictions] = useState<any[]>([]);
+  const [message, setMessage] = useState<string | null>(null);
+  const [data, setData] = useState<any[]>([]);
+  const [showTable, setShowTable] = useState<boolean>(false);
 
   const onDrop = (acceptedFiles: File[]) => {
     setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
@@ -88,11 +26,13 @@ export default function UploadPage() {
     files.forEach((file) => formData.append("file", file));
 
     try {
-      const response = await axios.post(`http://127.0.0.1:8000/logistic/${model}/train/`, formData, {
+      const response = await axios.post(`http://127.0.0.1:8000/${model}/train/`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      setPredictions(response.data.predictions);
+      setMessage(`Model trained successfully. Accuracy: ${response.data.accuracy}`);
+      setData(response.data.data);
+      setShowTable(true);
     } catch (error) {
       console.error("Error uploading file:", error);
       alert("Failed to upload file. Please try again.");
@@ -117,16 +57,38 @@ export default function UploadPage() {
           XGBoost
         </Button>
       </div>
-      <div className="w-full max-w-lg mt-4">
-        <h2 className="text-lg font-semibold">Predictions:</h2>
-        <ul className="mt-2 space-y-2">
-          {predictions.map((prediction, index) => (
-            <li key={index} className="flex items-center space-x-2 p-2 border rounded-md">
-              <span>{prediction}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
+      {message && <div className="mt-4 text-green-600">{message}</div>}
+      {showTable && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg p-4 max-h-96 overflow-y-auto w-11/12 max-w-2xl">
+            <h2 className="text-lg font-semibold mb-4">Predictions:</h2>
+            <table className="min-w-full bg-white">
+              <thead>
+                <tr>
+                  <th className="py-2">Time</th>
+                  <th className="py-2">V1</th>
+                  <th className="py-2">V2</th>
+                  <th className="py-2">V3</th>
+                  <th className="py-2">V4</th>
+                  <th className="py-2">Prediction</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.map((row, index) => (
+                  <tr key={index} className={row.Prediction === 0 ? "bg-gray-100" : "bg-white"}>
+                    <td className="border px-4 py-2">{row.Time}</td>
+                    <td className="border px-4 py-2">{row.V1}</td>
+                    <td className="border px-4 py-2">{row.V2}</td>
+                    <td className="border px-4 py-2">{row.V3}</td>
+                    <td className="border px-4 py-2">{row.V4}</td>
+                    <td className="border px-4 py-2">{row.Prediction}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
