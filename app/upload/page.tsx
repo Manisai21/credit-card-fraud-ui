@@ -1,4 +1,5 @@
 "use client";
+import Visualization from "@/components/Visualization";
 import axios from "axios";
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -8,15 +9,15 @@ import { Spinner } from "@/components/ui/spinner";
 export default function UploadPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [message, setMessage] = useState<string | null>(null);
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<any>(null); // Change to any to accommodate visualization data
   const [showTable, setShowTable] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false); // State to track if data is loading
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const onDrop = (acceptedFiles: File[]) => {
     setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
-    setMessage(null); // Clear message when new files are dropped
-    setData([]); // Clear data when new files are dropped
-    setShowTable(false); // Hide table when new files are dropped
+    setMessage(null);
+    setData(null); // Clear data when new files are dropped
+    setShowTable(false);
   };
 
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
@@ -27,8 +28,8 @@ export default function UploadPage() {
       return;
     }
 
-    setIsLoading(true); // Start loading indicator
-    setMessage(`${model.charAt(0).toUpperCase() + model.slice(1)} predictions loading...`); // Display loading message dynamically based on model
+    setIsLoading(true);
+    setMessage(`${model.charAt(0).toUpperCase() + model.slice(1)} predictions loading...`);
 
     const formData = new FormData();
     files.forEach((file) => formData.append("file", file));
@@ -39,13 +40,13 @@ export default function UploadPage() {
       });
 
       setMessage(`${model.charAt(0).toUpperCase() + model.slice(1)} predictions loaded successfully. Accuracy: ${response.data.accuracy}`);
-      setData(response.data.data);
+      setData(response.data); // Set the entire response data for visualization
       setShowTable(true);
-      setIsLoading(false); // Stop loading indicator
+      setIsLoading(false);
     } catch (error) {
       console.error("Error uploading file:", error);
       alert("Failed to upload file. Please try again.");
-      setIsLoading(false); // Stop loading indicator in case of error
+      setIsLoading(false);
     }
   };
 
@@ -75,38 +76,42 @@ export default function UploadPage() {
       ) : (
         <>
           {message && <div className="mt-4 text-green-600">{message}</div>}
-          {showTable && (
-            <div className="w-full max-w-4xl mt-6 overflow-x-auto">
-              <h2 className="text-lg font-semibold mb-4">Predictions:</h2>
-              <div className="table-wrapper" style={{maxHeight: '300px', overflowY: 'auto'}}>
-                <table className="min-w-full bg-white border border-gray-300">
-                  <thead>
-                    <tr className="bg-gray-200">
-                      <th className="py-2 px-2 border-b">Time</th>
-                      <th className="py-2 px-2 border-b">V1</th>
-                      <th className="py-2 px-2 border-b">V2</th>
-                      <th className="py-2 px-2 border-b">V3</th>
-                      <th className="py-2 px-2 border-b">V4</th>
-                      <th className="py-2 px-2 border-b">Prediction</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.map((row, index) => (
-                      <tr key={index} className={row.Prediction === 0 ? "bg-gray-100" : "bg-white"}>
-                        <td className="border px-2 py-2">{row.Time}</td>
-                        <td className="border px-2 py-2">{row.V1}</td>
-                        <td className="border px-2 py-2">{row.V2}</td>
-                        <td className="border px-2 py-2">{row.V3}</td>
-                        <td className="border px-2 py-2">{row.V4}</td>
-                        <td className={`border px-2 py-2 ${row.Prediction === 0 ? "text-red-500" : "text-green-500"}`}>
-                          {row.Prediction}
-                        </td>
+          {showTable && data && (
+            <>
+              <div className="w-full max-w-4xl mt-6 overflow-x-auto">
+                <div className="table-wrapper" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                  <table className="min-w-full bg-white border border-gray-300">
+                    <thead>
+                      <tr className="bg-gray-200">
+                        <th className="py-2 px-2 border-b">Time</th>
+                        <th className="py-2 px-2 border-b">V1</th>
+                        <th className="py-2 px-2 border-b">V2</th>
+                        <th className="py-2 px-2 border-b">V3</th>
+                        <th className="py-2 px-2 border-b">V4</th>
+                        <th className="py-2 px-2 border-b">Prediction</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {data.data.map((row, index) => (
+                        <tr key={index} className={row.Prediction === 0 ? "bg-gray-100" : "bg-white"}>
+                          <td className="border px-2 py-2">{row.Time}</td>
+                          <td className="border px-2 py-2">{row.V1}</td>
+                          <td className="border px-2 py-2">{row.V2}</td>
+                          <td className="border px-2 py-2">{row.V3}</td>
+                          <td className="border px-2 py-2">{row.V4}</td>
+                          <td className={`border px-2 py-2 ${row.Prediction === 0 ? "text-red-500" : "text-green-500"}`}>
+                            {row.Prediction}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
+              <div className="flex flex-col items-start p-6 space-y-6 w-full">
+                <Visualization data={data} /> {/* Include the Visualization component */}
+              </div>
+            </>
           )}
         </>
       )}

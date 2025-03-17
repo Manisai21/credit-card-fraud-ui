@@ -1,19 +1,25 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Header() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { isLoggedIn, logout } = useAuth(); 
+  const { isLoggedIn, logout } = useAuth();
+  const router = useRouter();
 
   const handleLogout = () => {
     // Remove auth token from local storage
     localStorage.removeItem("authToken");
     // Call the logout function from the context
     logout();
+  };
+
+  const handleProfileClick = () => {
+    router.push("/profile");
   };
 
   return (
@@ -53,12 +59,20 @@ export default function Header() {
         </ul>
         <div className="flex space-x-4" style={{ fontFamily: "'Roboto', sans-serif" }}>
           {isLoggedIn ? (
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-700 transition-colors duration-300 ease-in-out rounded-md p-2 w-24 text-center text-white"
-            >
-              Logout
-            </button>
+            <>
+              <button
+                onClick={handleProfileClick}
+                className="bg-green-500 hover:bg-green-700 transition-colors duration-300 ease-in-out rounded-md p-2 w-24 text-center text-white"
+              >
+                Profile
+              </button>
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 hover:bg-red-700 transition-colors duration-300 ease-in-out rounded-md p-2 w-24 text-center text-white"
+              >
+                Logout
+              </button>
+            </>
           ) : (
             <>
               <Link href="/login" className="text-white hover:text-white transition-colors duration-300 ease-in-out">

@@ -1,16 +1,24 @@
 "use client";
+import axios from "axios";
 import { useState } from "react";
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({ name: "", email: "", phone: "", message: "" });
-
+  const [status, setStatus] = useState({ type: "", message: "" });
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Form submitted successfully!");
+    // alert("Form submitted successfully!");
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/contact/send-email', formData);
+      setStatus({ type: "success", message: "Message sent successfully!" });
+      handleReset();
+    } catch (error) {
+      setStatus({ type: "error", message: "Failed to send message. Please try again." });
+    }
   };
 
   const handleReset = () => {
@@ -20,6 +28,13 @@ export default function ContactForm() {
   return (
     <div className="flex justify-center items-center min-h-screen  mt-10">
       <div className="relative w-full max-w-md">
+      {status.message && (
+        <div className={`mt-4 p-3 rounded-lg text-center ${
+          status.type === "success" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+        }`}>
+          {status.message}
+        </div>
+      )}
         <div className="absolute -top-3 -left-3 w-full h-full rounded-2xl transform rotate-6"></div>
         <div className="absolute -top-2 -left-2 w-full h-full bg-blue-300 rounded-2xl transform -rotate-6"></div>
         <div className="relative bg-gradient-to-br from-pink-400 to-purple-300 p-10 rounded-2xl shadow-xl">
