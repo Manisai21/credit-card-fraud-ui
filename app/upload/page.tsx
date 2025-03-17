@@ -1,17 +1,27 @@
 "use client";
 import Visualization from "@/components/Visualization";
 import axios from "axios";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { useAuth } from "@/context/AuthContext";
 
 export default function UploadPage() {
+  const { isLoggedIn } = useAuth();
+  const router = useRouter();
   const [files, setFiles] = useState<File[]>([]);
   const [message, setMessage] = useState<string | null>(null);
-  const [data, setData] = useState<any>(null); // Change to any to accommodate visualization data
+  const [data, setData] = useState<any>(null);
   const [showTable, setShowTable] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      router.push("/login");
+    }
+  }, [isLoggedIn, router]);
 
   const onDrop = (acceptedFiles: File[]) => {
     setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
@@ -88,17 +98,29 @@ export default function UploadPage() {
                         <th className="py-2 px-2 border-b">V2</th>
                         <th className="py-2 px-2 border-b">V3</th>
                         <th className="py-2 px-2 border-b">V4</th>
+                        <th className="py-2 px-2 border-b">V5</th>
+                        <th className="py-2 px-2 border-b">V6</th>
+                        <th className="py-2 px-2 border-b">V7</th>
+                        <th className="py-2 px-2 border-b">V8</th>
+                        <th className="py-2 px-2 border-b">V9</th>
+                        <th className="py-2 px-2 border-b">V10</th>
                         <th className="py-2 px-2 border-b">Prediction</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {data.data.map((row, index) => (
+                      {data.data.map((row: any, index: number) => ( // Added types for row and index
                         <tr key={index} className={row.Prediction === 0 ? "bg-gray-100" : "bg-white"}>
                           <td className="border px-2 py-2">{row.Time}</td>
                           <td className="border px-2 py-2">{row.V1}</td>
                           <td className="border px-2 py-2">{row.V2}</td>
                           <td className="border px-2 py-2">{row.V3}</td>
                           <td className="border px-2 py-2">{row.V4}</td>
+                          <td className="border px-2 py-2">{row.V5}</td>
+                          <td className="border px-2 py-2">{row.V6}</td>
+                          <td className="border px-2 py-2">{row.V7}</td>
+                          <td className="border px-2 py-2">{row.V8}</td>
+                          <td className="border px-2 py-2">{row.V9}</td>
+                          <td className="border px-2 py-2">{row.V10}</td>
                           <td className={`border px-2 py-2 ${row.Prediction === 0 ? "text-red-500" : "text-green-500"}`}>
                             {row.Prediction}
                           </td>

@@ -56,20 +56,21 @@ const Visualization = ({ data }) => {
             case 'fraudDistribution':
                 return (
                     <PieChart width={800} height={400}>
-                        <Pie data={Object.entries(data.fraud_distribution).map(([name, value]) => ({ name, value }))} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} fill="#8884d8" />
-                        <Tooltip />
-                    </PieChart>
-                );
-            case 'fraudOverTime':
-                return (
-                    <LineChart width={800} height={400} data={Object.entries(data.fraud_over_time).map(([time, fraud]) => ({ time, fraud }))}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="time" />
-                        <YAxis />
+                        <Pie 
+                            data={Object.entries(data.fraud_distribution).map(([name, value]) => ({
+                                name,
+                                value,
+                                fill: name === '1' ? '#ff0000' : '#8884d8' // Red for fraud (1), same color for not fraud (0)
+                            }))} 
+                            dataKey="value" 
+                            nameKey="name" 
+                            cx="50%" 
+                            cy="50%" 
+                            outerRadius={100} 
+                        />
                         <Tooltip />
                         <Legend />
-                        <Line type="monotone" dataKey="fraud" stroke="#8884d8" />
-                    </LineChart>
+                    </PieChart>
                 );
             default:
                 return null;
@@ -88,7 +89,7 @@ const Visualization = ({ data }) => {
                 <option value="rocCurve">ROC Curve</option>
                 <option value="featureImportance">Feature Importance</option>
                 <option value="fraudDistribution">Fraud Distribution</option>
-                <option value="fraudOverTime">Fraud Over Time</option>
+                {/* <option value="fraudOverTime">Fraud Over Time</option> */}
             </select>
 
             {/* Chart Container: Ensures No Jumping in Layout */}
