@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, Pie, PieChart, Tooltip, XAxis, YAxis } from "recharts";
 
-const Visualization = ({ data }) => {
+const Visualization = ({ data, model }) => {
     const [selectedChart, setSelectedChart] = useState('confusionMatrix');
     const [isDataLoading, setIsDataLoading] = useState(false);
 
@@ -32,7 +32,7 @@ const Visualization = ({ data }) => {
                     </BarChart>
                 );
             case 'rocCurve':
-                return (
+                return model !== 'autoencoder' && (
                     <LineChart width={800} height={400} data={data.roc_curve.fpr.map((fpr, index) => ({ fpr, tpr: data.roc_curve.tpr[index] }))}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="fpr" />
@@ -43,7 +43,7 @@ const Visualization = ({ data }) => {
                     </LineChart>
                 );
             case 'featureImportance':
-                return (
+                return model !== 'autoencoder' && (
                     <BarChart width={800} height={400} data={data.feature_importances.map((importance, index) => ({ feature: `V${index + 1}`, importance }))}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="feature" />
@@ -60,7 +60,7 @@ const Visualization = ({ data }) => {
                             data={Object.entries(data.fraud_distribution).map(([name, value]) => ({
                                 name,
                                 value,
-                                fill: name === '1' ? '#ff0000' : '#8884d8' // Red for fraud (1), same color for not fraud (0)
+                                fill: name === '1' ? '#ff0000' : '#8884d8'
                             }))} 
                             dataKey="value" 
                             nameKey="name" 
@@ -72,6 +72,17 @@ const Visualization = ({ data }) => {
                         <Legend />
                     </PieChart>
                 );
+            case 'reconstructionError':
+                return model === 'autoencoder' && (
+                    <BarChart width={800} height={400} data={data.reconstruction_errors.map((error, index) => ({ index, error }))}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="index" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Bar dataKey="error" fill="#8884d8" />
+                    </BarChart>
+                );
             default:
                 return null;
         }
@@ -79,20 +90,18 @@ const Visualization = ({ data }) => {
 
     return (
         <div className="flex flex-col items-start p-6 space-y-4 w-full">
-            {/* Heading and Dropdown Stay Aligned */}
             <h1 className="text-2xl font-semibold">Visualizations</h1>
             <select 
                 onChange={(e) => setSelectedChart(e.target.value)} 
                 className="border p-2 rounded"
             >
                 <option value="confusionMatrix">Confusion Matrix</option>
-                <option value="rocCurve">ROC Curve</option>
-                <option value="featureImportance">Feature Importance</option>
+                {model === 'isolation_forest' ? null : model !== 'autoencoder' && <option value="rocCurve">ROC Curve</option>}
+                {model === 'isolation_forest' ? null : model !== 'autoencoder' && <option value="featureImportance">Feature Importance</option>}
                 <option value="fraudDistribution">Fraud Distribution</option>
-                {/* <option value="fraudOverTime">Fraud Over Time</option> */}
+                {model === 'autoencoder' && <option value="reconstructionError">Reconstruction Error</option>}
             </select>
 
-            {/* Chart Container: Ensures No Jumping in Layout */}
             <div className="w-full flex justify-start items-start min-h-[450px]">
                 {renderChart()}
             </div>

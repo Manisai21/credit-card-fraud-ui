@@ -20,6 +20,10 @@ export const Spinner: React.FC<SpinnerProps> = ({ size = 'md', className }) => {
         sizeClasses[size],
         className
       ].filter(Boolean).join(' ')}
-    />
+      role="status"
+      aria-label="Loading"
+    >
+      <span className="sr-only">Loading...</span>
+    </div>
   );
 };

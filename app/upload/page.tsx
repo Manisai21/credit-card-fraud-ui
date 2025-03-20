@@ -16,6 +16,7 @@ export default function UploadPage() {
   const [data, setData] = useState<any>(null);
   const [showTable, setShowTable] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [selectedModel, setSelectedModel] = useState<string>("");
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -26,7 +27,7 @@ export default function UploadPage() {
   const onDrop = (acceptedFiles: File[]) => {
     setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
     setMessage(null);
-    setData(null); // Clear data when new files are dropped
+    setData(null);
     setShowTable(false);
   };
 
@@ -39,6 +40,7 @@ export default function UploadPage() {
     }
 
     setIsLoading(true);
+    setSelectedModel(model);
     setMessage(`${model.charAt(0).toUpperCase() + model.slice(1)} predictions loading...`);
 
     const formData = new FormData();
@@ -47,10 +49,11 @@ export default function UploadPage() {
     try {
       const response = await axios.post(`http://127.0.0.1:8000/${model}/train/`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true, // Include credentials for CORS
       });
 
-      setMessage(`${model.charAt(0).toUpperCase() + model.slice(1)} predictions loaded successfully. Accuracy: ${response.data.accuracy}`);
-      setData(response.data); // Set the entire response data for visualization
+      setMessage(`${model.charAt(0).toUpperCase() + model.slice(1)} predictions loaded successfully.`);
+      setData(response.data);
       setShowTable(true);
       setIsLoading(false);
     } catch (error) {
@@ -77,11 +80,17 @@ export default function UploadPage() {
         <Button onClick={() => handleUpload('xgboost')} className="bg-red-600 hover:bg-red-700">
           XGBoost
         </Button>
+        <Button onClick={() => handleUpload('isolation_forest')} className="bg-purple-600 hover:bg-purple-700">
+          Isolation Forest
+        </Button>
+        <Button onClick={() => handleUpload('autoencoder')} className="bg-orange-600 hover:bg-orange-700">
+          Autoencoder
+        </Button>
       </div>
       {isLoading ? (
         <div className="mt-4 text-center">
-          <Spinner />
-          <p>{message}</p>
+          <Spinner size="lg" />
+          <p className="mt-2 animate-pulse">{message}</p>
         </div>
       ) : (
         <>
@@ -104,11 +113,26 @@ export default function UploadPage() {
                         <th className="py-2 px-2 border-b">V8</th>
                         <th className="py-2 px-2 border-b">V9</th>
                         <th className="py-2 px-2 border-b">V10</th>
+                        <th className="py-2 px-2 border-b">V11</th>
+                        <th className="py-2 px-2 border-b">V12</th>
+                        <th className="py-2 px-2 border-b">V13</th>
+                        <th className="py-2 px-2 border-b">V14</th>
+                        <th className="py-2 px-2 border-b">V15</th>
+                        <th className="py-2 px-2 border-b">V16</th>
+                        <th className="py-2 px-2 border-b">V17</th>
+                        <th className="py-2 px-2 border-b">V18</th>
+                        <th className="py-2 px-2 border-b">V19</th>
+                        <th className="py-2 px-2 border-b">V20</th>
+                        <th className="py-2 px-2 border-b">V21</th>
+                        <th className="py-2 px-2 border-b">V22</th>
+                        <th className="py-2 px-2 border-b">V23</th>
+                        <th className="py-2 px-2 border-b">V24</th>
+                        <th className="py-2 px-2 border-b">V25</th>
                         <th className="py-2 px-2 border-b">Prediction</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {data.data.map((row: any, index: number) => ( // Added types for row and index
+                      {data.data.map((row: any, index: number) => (
                         <tr key={index} className={row.Prediction === 0 ? "bg-gray-100" : "bg-white"}>
                           <td className="border px-2 py-2">{row.Time}</td>
                           <td className="border px-2 py-2">{row.V1}</td>
@@ -121,6 +145,21 @@ export default function UploadPage() {
                           <td className="border px-2 py-2">{row.V8}</td>
                           <td className="border px-2 py-2">{row.V9}</td>
                           <td className="border px-2 py-2">{row.V10}</td>
+                          <td className="border px-2 py-2">{row.V11}</td>
+                          <td className="border px-2 py-2">{row.V12}</td>
+                          <td className="border px-2 py-2">{row.V13}</td>
+                          <td className="border px-2 py-2">{row.V14}</td>
+                          <td className="border px-2 py-2">{row.V15}</td>
+                          <td className="border px-2 py-2">{row.V16}</td>
+                          <td className="border px-2 py-2">{row.V17}</td>
+                          <td className="border px-2 py-2">{row.V18}</td>
+                          <td className="border px-2 py-2">{row.V19}</td>
+                          <td className="border px-2 py-2">{row.V20}</td>
+                          <td className="border px-2 py-2">{row.V21}</td>
+                          <td className="border px-2 py-2">{row.V22}</td>
+                          <td className="border px-2 py-2">{row.V23}</td>
+                          <td className="border px-2 py-2">{row.V24}</td>
+                          <td className="border px-2 py-2">{row.V25}</td>
                           <td className={`border px-2 py-2 ${row.Prediction === 0 ? "text-red-500" : "text-green-500"}`}>
                             {row.Prediction}
                           </td>
@@ -131,7 +170,7 @@ export default function UploadPage() {
                 </div>
               </div>
               <div className="flex flex-col items-start p-6 space-y-6 w-full">
-                <Visualization data={data} /> {/* Include the Visualization component */}
+                <Visualization data={data} model={selectedModel} /> {/* Pass model type to Visualization */}
               </div>
             </>
           )}

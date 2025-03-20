@@ -16,6 +16,8 @@ export default function Header() {
     localStorage.removeItem("authToken");
     // Call the logout function from the context
     logout();
+    // Redirect to home after logout
+    router.push("/");
   };
 
   const handleProfileClick = () => {
